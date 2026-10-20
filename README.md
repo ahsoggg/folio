@@ -76,7 +76,7 @@
 
 ## Установка
 
-Скачайте `Folio-Setup.exe` со страницы [Releases](https://github.com/ahsoggg-creator/folio/releases/latest) и
+Скачайте `Folio-Setup.exe` со страницы [Releases](https://github.com/ahsoggg/folio/releases/latest) и
 запустите. Права администратора не нужны: программа ставится в `%LOCALAPPDATA%\Programs\Folio`, в меню «Пуск»
 появляется ярлык, в «Приложения и возможности» — запись для удаления, а в «Открыть с помощью» — Folio. Есть и
 переносная версия — просто `Folio.exe` (установить её можно позже из «Настроек»); `folio-cli.exe` — консольная.

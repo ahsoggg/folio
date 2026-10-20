@@ -9,8 +9,8 @@ use std::fs;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
-pub const REPO: &str = "ahsoggg-creator/folio";
-const DOWNLOAD_PREFIX: &str = "https://github.com/ahsoggg-creator/folio/";
+pub const REPO: &str = "ahsoggg/folio";
+const DOWNLOAD_PREFIX: &str = "https://github.com/ahsoggg/folio/";
 const MAX_DOWNLOAD: u64 = 200 << 20;
 const CHECK_INTERVAL_SECS: i64 = 24 * 3600;
 
@@ -274,15 +274,15 @@ mod tests {
     }
 
     const RELEASE: &str = r#"{"tag_name":"v0.1.0","assets":[
-        {"name":"Folio.exe","browser_download_url":"https://github.com/ahsoggg-creator/folio/releases/download/v0.1.0/Folio.exe"},
-        {"name":"SHA256SUMS.txt","browser_download_url":"https://github.com/ahsoggg-creator/folio/releases/download/v0.1.0/SHA256SUMS.txt"}]}"#;
+        {"name":"Folio.exe","browser_download_url":"https://github.com/ahsoggg/folio/releases/download/v0.1.0/Folio.exe"},
+        {"name":"SHA256SUMS.txt","browser_download_url":"https://github.com/ahsoggg/folio/releases/download/v0.1.0/SHA256SUMS.txt"}]}"#;
 
     #[test]
     fn release_json_is_parsed_and_urls_are_pinned_to_the_repo() {
         let r = parse_release(RELEASE).unwrap();
         assert_eq!(r.version, (0, 1, 0));
         assert!(r.exe_url.ends_with("/Folio.exe"));
-        let evil = RELEASE.replace("github.com/ahsoggg-creator/folio", "evil.example.com/x");
+        let evil = RELEASE.replace("github.com/ahsoggg/folio", "evil.example.com/x");
         assert!(parse_release(&evil).is_err());
         assert!(parse_release(r#"{"tag_name":"v1.0.0","assets":[]}"#).is_err());
     }

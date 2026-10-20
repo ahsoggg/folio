@@ -1630,8 +1630,8 @@ impl App {
                     );
                     ui.add_space(8.0);
                     ui.hyperlink_to(
-                        "github.com/ahsoggg-creator/folio",
-                        "https://github.com/ahsoggg-creator/folio",
+                        "github.com/ahsoggg/folio",
+                        "https://github.com/ahsoggg/folio",
                     );
                 });
             });

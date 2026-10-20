@@ -78,11 +78,11 @@ fn write_registry(env: &Env, exe: &Path) -> Result<(), String> {
     let put = |name: &str, v: &str| key.set_value(name, &v.to_owned()).map_err(|e| e.to_string());
     put("DisplayName", APP_NAME)?;
     put("DisplayVersion", env!("CARGO_PKG_VERSION"))?;
-    put("Publisher", "ahsoggg-creator")?;
+    put("Publisher", "ahsoggg")?;
     put("InstallLocation", &env.install_dir.to_string_lossy())?;
     put("DisplayIcon", &exe.to_string_lossy())?;
     put("UninstallString", &format!("\"{}\" --uninstall", exe.display()))?;
-    put("URLInfoAbout", "https://github.com/ahsoggg-creator/folio")?;
+    put("URLInfoAbout", "https://github.com/ahsoggg/folio")?;
     key.set_value("EstimatedSize", &size_kb).map_err(|e| e.to_string())?;
     key.set_value("NoModify", &1u32).map_err(|e| e.to_string())?;
     key.set_value("NoRepair", &1u32).map_err(|e| e.to_string())?;

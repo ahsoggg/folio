@@ -76,7 +76,7 @@ Written in Rust (egui); PDF pages are drawn by pdfium, the engine of Chrome.
 
 ## Install
 
-Download `Folio-Setup.exe` from [Releases](https://github.com/ahsoggg-creator/folio/releases/latest) and run it. No
+Download `Folio-Setup.exe` from [Releases](https://github.com/ahsoggg/folio/releases/latest) and run it. No
 administrator rights are needed: the program goes to `%LOCALAPPDATA%\Programs\Folio`, a Start menu shortcut appears,
 "Apps & features" gets an uninstall entry and "Open with" lists Folio. A portable `Folio.exe` works too (it can be
 installed later from Settings); `folio-cli.exe` is the console version.

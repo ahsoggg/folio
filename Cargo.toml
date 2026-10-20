@@ -6,7 +6,7 @@ members = ["crates/core", "crates/cli", "crates/app"]
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/ahsoggg-creator/folio"
+repository = "https://github.com/ahsoggg/folio"
 
 [profile.dev]
 debug = 0
