@@ -1,0 +1,8 @@
+pdfium for Windows x64, built by bblanchon/pdfium-binaries
+release:  chromium/8111  (pdfium 158.0.8111.0)
+source:   https://github.com/bblanchon/pdfium-binaries/releases/tag/chromium%2F8111
+archive:  pdfium-win-x64.tgz  sha256 3452d11031050ec65e57f180215b57b9e6d465e3fbedafa8a77ad90885c7d23e
+member:   bin/pdfium.dll       sha256 a318c39c137482dc4687c2973b7ec1c27fc1c20253cf2dc31928f922eab89e8f
+
+The DLL is embedded into Folio.exe (crates/app/src/pdfdll.rs) and unpacked to %LOCALAPPDATA%\Folio on first use.
+To update it: download the new archive, replace pdfium.dll and licenses/, and update this file and pdfium.dll.sha256.

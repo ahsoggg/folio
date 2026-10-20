@@ -1,0 +1,23 @@
+[package]
+name = "folio-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Folio: document readers for many formats (no UI)"
+
+[dependencies]
+base64 = "0.22.1"
+calamine = { version = "0.37.0", features = ["dates"] }
+ego-tree = "0.11.0"
+encoding_rs = "0.8.42"
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp", "tiff", "ico"] }
+pdfium-render = { version = "0.9.4", default-features = false, features = ["pdfium_latest", "thread_safe", "image_025"] }
+pulldown-cmark = { version = "0.13.4", default-features = false, features = ["html"] }
+quick-xml = "0.42.0"
+scraper = "0.27.0"
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
+zip = { version = "9.0.5", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"

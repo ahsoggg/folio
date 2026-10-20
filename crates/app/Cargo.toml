@@ -1,0 +1,31 @@
+[package]
+name = "folio-app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Folio document reader (GUI, installer, updater)"
+
+[[bin]]
+name = "Folio"
+path = "src/main.rs"
+
+[dependencies]
+folio-core = { path = "../core" }
+eframe = { version = "0.36.2", default-features = false, features = ["default_fonts", "glow"] }
+egui_extras = "0.36.2"
+image = { version = "0.25.10", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp", "tiff", "ico"] }
+rfd = "0.17.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sha2 = "0.11.1"
+tempfile = "3.27.0"
+ureq = "3.4.2"
+winreg = "0.56.0"
+windows-core = "0.62"
+windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_Storage", "Win32_Storage_FileSystem", "Win32_System_Console", "Win32_System_Com", "Win32_System_Com_StructuredStorage", "Win32_System_Ole", "Win32_System_Threading", "Win32_Security", "Win32_Media_Speech", "Win32_UI_Shell", "Win32_UI_Shell_Common", "Win32_UI_WindowsAndMessaging", "Win32_System_SystemServices", "Win32_System_Memory", "Win32_Graphics_Gdi"] }
+syntect = { version = "5.3.0", default-features = false, features = ["default-fancy"] }
+
+[build-dependencies]
+embed-resource = "3.0.12"
+

@@ -1,0 +1,17 @@
+[package]
+name = "folio-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Folio command-line tool: dump text, info and conversions"
+
+[[bin]]
+name = "folio-cli"
+path = "src/main.rs"
+
+[dependencies]
+folio-core = { path = "../core" }
+
+[dev-dependencies]
+tempfile = "3.27.0"

@@ -1,0 +1,24 @@
+1 ICON "icon.ico"
+1 24 "app.manifest"
+
+1 VERSIONINFO
+FILEVERSION FO_MAJOR,FO_MINOR,FO_PATCH,0
+PRODUCTVERSION FO_MAJOR,FO_MINOR,FO_PATCH,0
+FILEOS 0x40004
+FILETYPE 0x1
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "041904B0"
+    BEGIN
+      VALUE "CompanyName", "Folio"
+      VALUE "FileDescription", "Folio document reader"
+      VALUE "ProductName", "Folio"
+      VALUE "OriginalFilename", "Folio.exe"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x419, 1200
+  END
+END
