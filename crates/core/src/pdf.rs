@@ -137,7 +137,10 @@ impl Engine {
         let (tx, rx) = channel();
         std::thread::Builder::new()
             .name("pdfium".into())
-            .spawn(move || worker(pdfium, rx))
+            .spawn(move || {
+                // a panic loses the open documents but must not end PDF support for the whole session
+                while std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| worker(pdfium, &rx))).is_err() {}
+            })
             .map_err(|e| e.to_string())?;
         Ok(Engine { tx })
     }
@@ -394,7 +397,7 @@ fn outline(doc: &PdfDocument) -> Vec<OutlineItem> {
 
 type CharCache = Vec<((DocId, usize), std::rc::Rc<Vec<CharBox>>)>;
 
-fn worker(pdfium: &'static Pdfium, rx: Receiver<Req>) {
+fn worker(pdfium: &'static Pdfium, rx: &Receiver<Req>) {
     let mut docs: HashMap<DocId, PdfDocument<'static>> = HashMap::new();
     let mut next_id: DocId = 1;
     let mut cache: CharCache = Vec::new();

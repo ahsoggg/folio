@@ -297,9 +297,24 @@ fn local_image_loader(base: PathBuf) -> impl FnMut(&str) -> Option<Vec<u8>> {
             return None;
         }
         let rel = src.split(['#', '?']).next().unwrap_or(src).replace("%20", " ");
-        let p = base.join(rel);
+        // only paths below the document's folder: no drives, no UNC (that would open a network connection), no `..`
+        let rel_path = Path::new(&rel);
+        if rel.starts_with(['\\', '/'])
+            || rel_path.is_absolute()
+            || rel_path.has_root()
+            || rel_path
+                .components()
+                .any(|c| !matches!(c, std::path::Component::Normal(_) | std::path::Component::CurDir))
+        {
+            return None;
+        }
+        let p = base.join(rel_path);
         let meta = std::fs::metadata(&p).ok()?;
-        (meta.len() < (64 << 20)).then(|| std::fs::read(p).ok()).flatten()
+        if !meta.is_file() || meta.len() >= (64 << 20) {
+            return None;
+        }
+        let bytes = std::fs::read(p).ok()?;
+        image::guess_format(&bytes).ok().map(|_| bytes)
     }
 }
 
@@ -452,6 +467,21 @@ mod tests {
         assert_eq!(detect(Path::new("noext"), b"hello world"), Some(Kind::Text));
         assert_eq!(detect(Path::new("noext"), &[0, 1, 2, 3]), None);
         assert_eq!(detect(Path::new("main.RS"), b""), Some(Kind::Code));
+    }
+
+    #[test]
+    fn local_images_stay_below_the_document_folder() {
+        let dir = tempfile::tempdir().unwrap();
+        testkit::write(dir.path(), "a.png", &testkit::tiny_png());
+        testkit::write(dir.path(), "secret.txt", b"not a picture");
+        let mut load = local_image_loader(dir.path().to_path_buf());
+        assert!(load("a.png").is_some());
+        assert!(load("./a.png").is_some());
+        assert!(load("secret.txt").is_none(), "only pictures are read");
+        assert!(load(r"..\a.png").is_none());
+        assert!(load("//host/share/a.png").is_none());
+        assert!(load(r"\\host\share\a.png").is_none());
+        assert!(load(r"C:\Windows\win.ini").is_none());
     }
 
     #[test]

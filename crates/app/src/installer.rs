@@ -116,7 +116,12 @@ pub fn install(env: &Env, source_exe: &Path) -> Result<PathBuf, String> {
             let _ = fs::remove_file(&old);
             fs::rename(&target, &old).map_err(|e| format!("cannot replace the installed copy: {e}"))?;
         }
-        fs::copy(source_exe, &target).map_err(|e| format!("cannot copy the program: {e}"))?;
+        if let Err(e) = fs::copy(source_exe, &target) {
+            // never leave the user without a program: put the old copy back
+            let _ = fs::remove_file(&target);
+            let _ = fs::rename(target.with_extension("exe.old"), &target);
+            return Err(format!("cannot copy the program: {e}"));
+        }
     }
     winint::create_shortcut(&env.shortcut(), &target, "", "Folio — document reader")?;
     write_registry(env, &target)?;
@@ -148,7 +153,7 @@ fn schedule_dir_removal(dir: &Path) {
     // script is wrapped in one pair of quotes, which `cmd /C` strips, so the quoted path inside survives.
     let d = dir.display();
     let script = format!(
-        "\"ping 127.0.0.1 -n 3 >nul & rmdir /s /q \"{d}\" & if exist \"{d}\" (ping 127.0.0.1 -n 4 >nul & rmdir /s /q \"{d}\")\""
+        "\"for /L %i in (1,1,40) do @(ping 127.0.0.1 -n 2 >nul & rmdir /s /q \"{d}\" 2>nul & if not exist \"{d}\" exit)\""
     );
     let _ = std::process::Command::new("cmd.exe")
         .arg("/C")

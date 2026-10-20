@@ -99,6 +99,7 @@ fn main() -> ExitCode {
         .filter(|a| !a.starts_with("--") && Some(PathBuf::from(a)) != shots)
         .map(PathBuf::from)
         .filter(|p| p.is_file())
+        .map(|p| std::path::absolute(&p).unwrap_or(p))
         .collect();
 
     // one window per user: hand the files to the running one

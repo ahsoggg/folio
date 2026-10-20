@@ -30,7 +30,12 @@ impl Numbering {
             match ev {
                 Ev::Start { name, attrs } => match name.as_str() {
                     "abstractNum" => abs = attr(&attrs, "abstractNumId").unwrap_or("").to_owned(),
-                    "lvl" => lvl = attr(&attrs, "ilvl").and_then(|v| v.parse().ok()).unwrap_or(0),
+                    "lvl" => {
+                        lvl = attr(&attrs, "ilvl")
+                            .and_then(|v| v.parse().ok())
+                            .unwrap_or(0usize)
+                            .min(8)
+                    }
                     "numFmt" => {
                         n.formats
                             .insert((abs.clone(), lvl), attr(&attrs, "val").unwrap_or("decimal").to_owned());
@@ -216,7 +221,7 @@ impl Parser<'_> {
                     "rPr" => in_rpr = true,
                     "pStyle" if in_ppr => p.style_id = attr(attrs, "val").map(str::to_owned),
                     "ilvl" if in_ppr => {
-                        let l = attr(attrs, "val").and_then(|v| v.parse().ok()).unwrap_or(0);
+                        let l = attr(attrs, "val").and_then(|v| v.parse().ok()).unwrap_or(0usize).min(8);
                         p.num = Some((p.num.take().map(|n| n.0).unwrap_or_default(), l));
                     }
                     "numId" if in_ppr => {
@@ -371,7 +376,10 @@ impl Parser<'_> {
                     }
                     "gridSpan" if depth == 1 => {
                         if let Some(c) = cell.as_mut() {
-                            c.colspan = attr(attrs, "val").and_then(|v| v.parse().ok()).unwrap_or(1).max(1);
+                            c.colspan = attr(attrs, "val")
+                                .and_then(|v| v.parse().ok())
+                                .unwrap_or(1usize)
+                                .clamp(1, 64);
                         }
                     }
                     "p" => {
@@ -542,6 +550,19 @@ pub fn read<R: Read + Seek>(zip: &mut Archive<R>) -> Result<(Flow, Meta), String
 mod tests {
     use super::*;
     use crate::testkit;
+
+    #[test]
+    fn absurd_grid_spans_and_list_levels_are_clamped() {
+        let xml = r#"<w:document xmlns:w="w"><w:body><w:p><w:pPr><w:numPr><w:ilvl w:val="4000000000"/><w:numId w:val="1"/></w:numPr></w:pPr><w:r><w:t>x</w:t></w:r></w:p>
+<w:tbl><w:tr><w:tc><w:tcPr><w:gridSpan w:val="4000000000"/></w:tcPr><w:p><w:r><w:t>c</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:body></w:document>"#;
+        let bytes = crate::testkit::zip_bytes(&[
+            ("word/document.xml", xml.as_bytes()),
+            ("word/numbering.xml", crate::testkit::DOCX_NUMBERING.as_bytes()),
+        ]);
+        let (flow, _) = read(&mut Archive::new(std::io::Cursor::new(bytes)).unwrap()).unwrap();
+        let Block::Table(t) = &flow.blocks[1] else { panic!() };
+        assert_eq!(t.rows[0][0].colspan, 64);
+    }
 
     #[test]
     fn reads_headings_runs_lists_tables_and_images() {

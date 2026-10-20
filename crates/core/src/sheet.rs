@@ -31,7 +31,7 @@ pub fn read_workbook(bytes: Vec<u8>) -> Result<Vec<Sheet>, String> {
     for name in wb.sheet_names() {
         let Ok(range) = wb.worksheet_range(&name) else { continue };
         let (r0, c0) = range.start().map(|(r, c)| (r as usize, c as usize)).unwrap_or((0, 0));
-        let (r0, c0) = (r0.min(100_000), c0.min(1_000));
+        let (r0, c0) = (r0.min(2_000), c0.min(60));
         let mut rows: Vec<Vec<String>> = Vec::new();
         let mut cols = 0;
         for _ in 0..r0 {

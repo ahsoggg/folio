@@ -40,6 +40,14 @@ pub fn is_read_only() -> bool {
     READ_ONLY.load(std::sync::atomic::Ordering::Relaxed)
 }
 
+/// Writes next to the target and renames, so a crash in the middle never leaves a half-written file.
+pub fn write_atomic(path: &std::path::Path, bytes: &[u8]) {
+    let tmp = path.with_extension("tmp");
+    if std::fs::write(&tmp, bytes).is_ok() && std::fs::rename(&tmp, path).is_err() {
+        let _ = std::fs::remove_file(&tmp);
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ThemeId {
@@ -122,10 +130,31 @@ impl Settings {
     }
 
     pub fn load() -> Self {
-        std::fs::read(Self::path())
+        let mut s: Settings = std::fs::read(Self::path())
             .ok()
             .and_then(|b| serde_json::from_slice(&b).ok())
-            .unwrap_or_default()
+            .unwrap_or_default();
+        s.sanitize();
+        s
+    }
+
+    /// Hand-edited or damaged values must not break the window.
+    fn sanitize(&mut self) {
+        let fix = |v: &mut f32, lo: f32, hi: f32, default: f32| {
+            *v = if v.is_finite() { v.clamp(lo, hi) } else { default };
+        };
+        fix(&mut self.font_size, 11.0, 40.0, 18.0);
+        fix(&mut self.line_spacing, 1.0, 2.5, 1.45);
+        fix(&mut self.column_width, 300.0, 1600.0, 780.0);
+        self.speech_rate = self.speech_rate.clamp(-10, 10);
+        if let Some(sz) = self.window_size
+            && !(sz[0].is_finite()
+                && sz[1].is_finite()
+                && (400.0..=8000.0).contains(&sz[0])
+                && (300.0..=6000.0).contains(&sz[1]))
+        {
+            self.window_size = None;
+        }
     }
 
     pub fn save(&self) {
@@ -134,7 +163,7 @@ impl Settings {
         }
         let _ = std::fs::create_dir_all(data_dir());
         if let Ok(json) = serde_json::to_vec_pretty(self) {
-            let _ = std::fs::write(Self::path(), json);
+            write_atomic(&Self::path(), &json);
         }
     }
 }
@@ -166,6 +195,14 @@ pub fn use_test_data_dir() -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn absurd_values_are_repaired() {
+        let mut s: Settings =
+            serde_json::from_str(r#"{"font_size":0.0,"column_width":1e30,"window_size":[0.0,1e9]}"#).unwrap();
+        s.sanitize();
+        assert_eq!((s.font_size, s.column_width, s.window_size), (11.0, 1600.0, None));
+    }
 
     #[test]
     fn missing_fields_fall_back_to_defaults() {

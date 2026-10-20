@@ -95,7 +95,7 @@ in the settings erases `library.json`.
 ## Build
 
 ```powershell
-cargo test --workspace            # 77 tests, including the real pdfium
+cargo test --workspace            # 81 tests, including the real pdfium
 cargo build --release             # target\release\Folio.exe and folio-cli.exe
 target\release\Folio.exe --screenshots docs\screenshots   # regenerate the screenshots (off-screen window)
 powershell -ExecutionPolicy Bypass -File scripts\release.ps1   # checks + dist\ with checksums
@@ -111,7 +111,7 @@ GitHub Actions builds, checks and publishes the files.
 
 ## What was not verified, and limits
 
-Verified by tests (77), a sandboxed registry branch and rendering the window off-screen. **Not verified live:** speech
+Verified by tests (81), a sandboxed registry branch and rendering the window off-screen. **Not verified live:** speech
 (the sound), several monitors and display scaling above 100 %, the Explorer menu and "Open with" on a real system,
 updating from a real release, printing. Not supported: `.doc`, `.ppt`, DjVu, CBR/RAR, a two-page spread, editing and
 annotations. DOCX footnotes and equations are not shown.

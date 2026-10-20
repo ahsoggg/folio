@@ -66,7 +66,7 @@ impl Library {
         }
         let _ = std::fs::create_dir_all(data_dir());
         if let Ok(json) = serde_json::to_vec(self) {
-            let _ = std::fs::write(Self::file(), json);
+            crate::settings::write_atomic(&Self::file(), &json);
         }
     }
 

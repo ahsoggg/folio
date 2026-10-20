@@ -615,10 +615,10 @@ impl FlowView {
         let cols = t
             .rows
             .iter()
-            .map(|r| r.iter().map(|c| c.colspan).sum::<usize>())
+            .map(|r| r.iter().map(|c| c.colspan.min(64)).sum::<usize>())
             .max()
             .unwrap_or(1)
-            .max(1);
+            .clamp(1, 256);
         // column widths follow the longest text of the column, within sane bounds
         let mut want = vec![60.0f32; cols];
         for r in &t.rows {

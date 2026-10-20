@@ -66,6 +66,9 @@ fn parse_nav(text: &str, base: &str) -> Vec<(u8, String, String)> {
         return Vec::new();
     };
     fn walk(el: ElementRef, depth: u8, base: &str, out: &mut Vec<(u8, String, String)>) {
+        if depth > 40 {
+            return;
+        }
         for c in el.children().filter_map(ElementRef::wrap) {
             match c.value().name() {
                 "a" => {

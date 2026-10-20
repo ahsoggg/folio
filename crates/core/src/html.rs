@@ -4,6 +4,8 @@ use crate::model::*;
 use scraper::{ElementRef, Html, Node};
 use std::sync::Arc;
 
+const MAX_DEPTH: usize = 150;
+
 pub type ImageLoader<'a> = &'a mut dyn FnMut(&str) -> Option<Vec<u8>>;
 
 struct Conv<'a> {
@@ -15,6 +17,7 @@ struct Conv<'a> {
     marker: Option<String>,
     quote: u32,
     align: Align,
+    depth: usize,
 }
 
 fn is_skipped(name: &str) -> bool {
@@ -182,6 +185,16 @@ impl Conv<'_> {
     }
 
     fn element(&mut self, el: ElementRef) {
+        // hostile files nest tens of thousands of elements deep: stop before the stack does
+        if self.depth >= MAX_DEPTH {
+            return;
+        }
+        self.depth += 1;
+        self.element_inner(el);
+        self.depth -= 1;
+    }
+
+    fn element_inner(&mut self, el: ElementRef) {
         let name = el.value().name();
         if is_skipped(name) || el.value().attr("hidden").is_some() {
             return;
@@ -317,6 +330,7 @@ pub fn convert(html: &str, flow: &mut Flow, loader: ImageLoader) {
         marker: None,
         quote: 0,
         align: Align::Left,
+        depth: 0,
     };
     let root = doc.root_element();
     // only the body: <head><title> must not appear as text
@@ -376,6 +390,16 @@ mod tests {
         assert!(matches!(&f.blocks[7], Block::Quote(q) if q.text() == "цитата"));
         assert!(matches!(f.blocks[8], Block::Rule));
         assert_eq!(f.blocks.len(), 9);
+    }
+
+    #[test]
+    fn absurdly_deep_nesting_does_not_overflow_the_stack() {
+        let html = format!("{}x{}", "<div>".repeat(60_000), "</div>".repeat(60_000));
+        let handle = std::thread::Builder::new()
+            .stack_size(2 << 20)
+            .spawn(move || conv(&html))
+            .unwrap();
+        handle.join().expect("no overflow");
     }
 
     #[test]

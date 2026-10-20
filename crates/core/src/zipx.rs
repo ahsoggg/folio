@@ -4,7 +4,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Read, Seek};
 
-const MAX_MEMBER: u64 = 512 << 20;
+const MAX_MEMBER: u64 = 128 << 20;
+/// XML parts are expanded into event lists many times their size.
+const MAX_XML: u64 = 48 << 20;
 
 pub struct Archive<R: Read + Seek> {
     zip: zip::ZipArchive<R>,
@@ -51,6 +53,10 @@ impl<R: Read + Seek> Archive<R> {
     }
 
     pub fn read_str(&mut self, name: &str) -> Option<String> {
+        let i = *self.index.get(&name.replace('\\', "/").to_ascii_lowercase())?;
+        if self.zip.by_index(i).ok()?.size() > MAX_XML {
+            return None;
+        }
         let bytes = self.read(name)?;
         Some(crate::textenc::decode(&bytes).0)
     }
