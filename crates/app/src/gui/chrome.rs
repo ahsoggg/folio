@@ -1629,10 +1629,7 @@ impl App {
                         .size(12.5),
                     );
                     ui.add_space(8.0);
-                    ui.hyperlink_to(
-                        "github.com/ahsoggg/folio",
-                        "https://github.com/ahsoggg/folio",
-                    );
+                    ui.hyperlink_to("github.com/ahsoggg/folio", "https://github.com/ahsoggg/folio");
                 });
             });
         self.about_open = open;
